@@ -1,0 +1,264 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Creates an EC2 Container Service Cluster
+
+Parameters:
+  EnvironmentName:
+    Description: Environment Name
+    Type: String
+  ApplicationName:
+    Description: An environment name That will be prefixed to resource names
+    Type: string
+  InstanceType:
+    Type: String
+    Default: t2.large
+  DesiredClusterSize:
+    Type: Number
+    Default: 3
+  AsgMinSize:
+    Type: Number
+    Default: 2
+  AsgMaxSize:
+    Type: Number
+    Default: 7
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  InstanceDetailMonitoring:
+    Description: Instance Detail Monitoring True or false?
+    Type: String
+  Env:
+    Description: Environment Type (Dev, Test, Prod)
+    Type: String
+    AllowedValues:
+      - "Prod"
+      - "Dev"
+      - "Test"
+    Default: Dev
+  ResourceOwner:
+    Type: String
+    Default: firstname.lastname
+  Proxy:
+    Type: String
+    Default:
+  ProxyPort:
+    Type: Number
+    Default: 8080
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+  ECSClusterSecurityGroup:
+    Type: String
+    Default: ""
+  InstanceProfile:
+    Type: String
+    Default: ""
+  AMIImageId:
+    Type: String
+  MetricType:
+    Description: Alarm Type
+    Type: String
+    AllowedValues:
+          - "CPUUtilization"
+          - "RequestCount"
+          - "MemoryReservation"
+          - "TTMemoryReservation"
+    Default: "CPUUtilization"
+  MinThreshold:
+    Type: Number
+    Description: Min Threshold for the selected metrics
+
+  MaxThresold:
+    Type: Number
+    Description: Max Threshold for the selected Metric
+
+  Costcenter:
+    Type: String
+  CompanyCode:
+    Type: String
+
+  EmployerAdminKey:
+    Type: String
+  EmployerUserKey:
+    Type: String
+
+Conditions:
+  CreateProdResources:
+  CPUUtilizationMetric:
+  MemoryReservationMetric:
+  RequestCountMetric:
+  CPUOrMemoryorRequestCountMetric:
+  TTMemoryReservationMetric:
+
+Resources:
+  Cluster:
+    Type:
+    Properties:
+      ClusterName:
+
+  # CPU Scaling reservations policies/alerts
+  ScaleUpPolicy:
+    Type: AWS::Autoscaling::ScalingPolicy
+    Condition:
+    Properties:
+       AdjustmentType:
+       AutoScalingGroupName:
+       Cooldown:
+       ScalingAdjustment:
+
+  TTScalingPolicy:
+    Type: AWS::Autoscaling::ScalingPolicy
+    Condition: TTMemoryReservationMetric
+    Properties:
+      AutoScalingGroupName:
+      PolicyType:
+      TargetTrackingConfiguration:
+        CustomizedMetricSpecification:
+            Dimensions:
+              - Name:
+                Value:
+            MetricName:
+            Namespace:
+            statistic:
+        TargetValue:
+
+  CPUReservationHighAlert:
+    Type:
+    Condition:
+    Properties:
+      EvaluationPeriods: '3'
+      Statistic:
+      Threshold:
+      Period:
+      AlarmActions:
+      - !Ref
+      Dimensions:
+      - Name:
+        Value:
+      ComparisonOPerator:
+      MetricName:
+      Namespace:
+
+  ScaleDownPolicy:
+    Type:
+    Condition:
+    Properties:
+      AdjustmentType:
+      AutoScalingGroupName:
+      Cooldown:
+      ScalingAdjustment:
+
+  CPUReservationlowAlert:
+    Type:
+    Condition:
+    Properties:
+      EvaluationPeriods:
+      Statistic:
+      # Reset by Rod to 0. Need to ask Steve how to size this
+      Threshold:
+      Period:
+      AlarmActiona:
+      - !Ref ScaleDownPolicy
+      Dimensions:
+      - Name:
+        value:
+      ComparisonOperator:
+      MetricName:
+      Namespace:
+
+  MemReservationHighAlert:
+    Type:
+    Condition:
+    Properties:
+      EvaluationPeriods:
+      Statistic:
+      ThreShold:
+      Period:
+      AlarmActions:
+      - !Ref
+      Dimensions:
+      - Name:
+        Value:
+      ComparisonOperator:
+      MetricName:
+      Namespace:
+
+  MemReservationLowAlert:
+    Type:
+    Condition:
+    Properties:
+      EvaluationPeriods:
+      Statistic:
+      ThreShold:
+      Period:
+      AlarmActions:
+      - !Ref
+      Dimensions:
+      - Name:
+        Value:
+      ComparisonOperator:
+      MetricName:
+      Namespace:
+
+  AutoScalingGroup:
+    Type:
+    Properties:
+      VPCZoneIdentifier:
+      LaunchConfigurationName:
+      MinSize:
+      MaxSize:
+      DesiredCapacity:
+      MatricsCollection:
+      -
+        Granularity: 
+        Metrics:
+          - "GroupMinSize"
+          - "GroupMaxSize"
+          - "GroupTotalInstances"
+          - "GroupDesiredCapacity"
+        
+        Tags:
+          - Key:
+            Value:
+            PropagateAtLaunch:
+          - Key:
+            Value:
+            PropagationAtLaunch:
+          - Key:
+            Value:
+            PropagationAtLaunch:
+          - Key:
+            Value:
+            PropagationAtLaunch:
+
+  LaunchConfiguration:
+    Type:
+    Properties:
+      KeyName:
+      ImageId:
+      InstanceType:
+      IamInstanceProfile:
+      InstanceMonoitoring:
+      SecurityGroups:
+        - !Ref
+      UserData:
+        "Fn::Base64": !Sub |
+        #!/bin/bash
+
+Outputs:
+  ECSClusterName:
+    Value:
+    Export:
+      Name:
+
+  ECSAutoScalingGroup:
+    Value:
+    Export:
+      Name:
+       
+
+
+
+
+
+
+
