@@ -234,16 +234,16 @@ Resources:
     Type:
     Properties:
       KeyName:
-      ImageId:
-      InstanceType:
-      IamInstanceProfile:
-      InstanceMonoitoring:
+      ImageId: ami-0be9e1908fe51a590
+      InstanceType: t2.large
+      IamInstanceProfile: ecsInstanceRole
+      InstanceMonoitoring: 
       SecurityGroups:
         - !Ref
       UserData:
         "Fn::Base64": !Sub |
         #!/bin/bash
-
+        echo ECS_CLUSTER=EcsRvCluster>>/etc/ecs/ecs.config
 Outputs:
   ECSClusterName:
     Value:

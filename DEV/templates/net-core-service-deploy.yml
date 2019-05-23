@@ -1,0 +1,105 @@
+Description:
+
+   This template contains the security groups required by the entire stack.
+   We create them ina a seperate nested templated, so they can be refrenced
+   by all of the other nested templates
+
+parameters:
+    VPC:
+        Description: Choose with VPC this ECS cluster should be deplloyed to
+        Type: AWS::Ec2::VPC::Id
+
+    ApplicationName:
+        Description: An Environment name that will be prefixed to resource names
+        Type: String
+
+    EnvironmentName:
+        Description: An environment name that will be prefixed to resource names
+        Type: String
+
+    DesiredCount:
+         Description: How many instances of this task should we run across our cluster
+         Type: Number
+         Default: "2"
+
+    MemorySize:
+         Description: Megabytes for insantiating Docker container (hard limit) must be greater that MemoryReservation.
+         Type: Number
+         Default: "2048"
+
+    MemoryReservation:
+         Description: Megabytes to reserve for the docker container (soft limit). Must be less than Memory
+         Type: Number
+         Default: "1024"
+
+    HighMemorySize:
+         Description: Megabytes for instantiating Docker container (hard limit) Must be greater than MemoryReservation
+         Type: Number
+         Default: "2048"
+
+    HighMemoryReservation:
+         Description: Megabytes to reserve for the Docker container (soft limit). Must be less than memory
+         Type: Number
+         Default: "1024"
+
+    ScalingCapacity:
+         Description: Desired Count, Minimum Service Capacity, Maximum Service Capacity
+         Type: ListNumber>
+         Default: "2,2,2"
+
+    CoreImageName:
+         Description: Name of Docker image for netcore
+         Type: String
+
+    ServiceScalingrole:
+         Description: Service Scaling Role
+         Type: String
+
+    ECSserviceRole:
+         Description: ECS Service Role
+         Type: String
+    
+    costcenter:
+         Type: String
+    CompanyCode:
+         Type: String
+
+
+Resources:
+
+    CoreService:
+        Type: AWS::CloudFormation::Stack
+        Properties:
+            TemplateURL: services/net-core-service.yml
+            Parameters:
+                VPC: !Ref VPC
+                EnvironmentName: !Sub "${EnvironmentName}-API"
+                ApplicationName: !Ref ApplicationName
+                ContainerName: "core-service"
+                ContainerPort: 5000
+                HealthCheckPath: ""
+                Path: ""
+                LBListenerPriority: "10"
+                DesiredCount: !Select [0, !Ref ScalingCapacity]
+                MemorySize: !Ref HighMemorySize
+                MemoryReservation: !Ref HighMemoryReservation
+                ImageName: !Ref CoreImageName
+                TargetGroupPort: 80
+                TargetGroupProtocol: "HTTP"
+                HealthCheckProtocol: "HTTP"
+                ServiceScalingRoleARN: !Ref ServiceScalingRole
+                ECSServiceRoleARN: !Ref ECSServiceRole
+                MetricType: CPUUtilization
+                MinThreshold: 30
+                MaxThreshold: 30
+                MinCapacity: !Select [1, !Ref ScalingCapacity]
+                MaxCapacity: !Select [2, !Ref ScalingCapacity]
+                costcenter: !Ref costcenter
+                CompanyCode: !Ref CompanyCode
+            Tags:
+              - Key: Name
+                Value: !Sub "${CompanyCode}-${EnvironmentName}-coreservice-cf"
+              - Key: costcenter
+                Value: !Ref costcenter
+                
+                    
