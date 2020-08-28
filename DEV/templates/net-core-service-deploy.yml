@@ -25,7 +25,7 @@ parameters:
     MemorySize:
          Description: Megabytes for insantiating Docker container (hard limit) must be greater that MemoryReservation.
          Type: Number
-         Default: "2048"
+         Default: "1024"
 
     MemoryReservation:
          Description: Megabytes to reserve for the docker container (soft limit). Must be less than Memory
